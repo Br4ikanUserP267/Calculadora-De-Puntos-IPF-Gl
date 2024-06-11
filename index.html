@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Powerlifting</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+        }
+        .container {
+            margin-top: 50px;
+            max-width: 500px;
+        }
+        .form-control, .btn, .custom-select {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            border-color: #424242;
+        }
+        .btn-primary {
+            background-color: #6200ea;
+            border-color: #6200ea;
+        }
+        .btn-primary:hover {
+            background-color: #3700b3;
+            border-color: #3700b3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 class="text-center">Calculadora Powerlifting</h1>
+        <form id="powerlifting-form">
+            <div class="form-group">
+                <label for="gender">Género:</label>
+                <select id="gender" class="custom-select" required>
+                    <option value="men">Masculino</option>
+                    <option value="women">Femenino</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="category">Categoría:</label>
+                <select id="category" class="custom-select" required>
+                    <option value="equippedPowerlifting">Powerlifting Equipado</option>
+                    <option value="classicPowerlifting">Powerlifting Clásico</option>
+                    <option value="equippedBenchPress">Press de Banca Equipado</option>
+                    <option value="classicBenchPress">Press de Banca Clásico</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="bw">Peso Corporal (kg):</label>
+                <input type="number" id="bw" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <div class="form-check">
+                    <input type="checkbox" id="calculateByLift" class="form-check-input">
+                    <label for="calculateByLift" class="form-check-label">Calcular total por movimiento</label>
+                </div>
+            </div>
+            
+            <div id="lifting-totals" style="display: none;">
+                <div class="form-group">
+                    <label for="squat">Sentadilla (kg):</label>
+                    <input type="number" id="squat" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="bench">Press de Banca (kg):</label>
+                    <input type="number" id="bench" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="deadlift">Peso Muerto (kg):</label>
+                    <input type="number" id="deadlift" class="form-control">
+                </div>
+            </div>
+            
+            <div class="form-group" id="total-field">
+                <label for="total">Total (kg):</label>
+                <input type="number" id="total" class="form-control">
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">Calcular IPF Points</button>
+        </form>
+        
+        <h2 id="result" class="text-center mt-4"></h2>
+    </div>
+
+    <script>
+        document.getElementById('powerlifting-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const gender = document.getElementById('gender').value;
+            const category = document.getElementById('category').value;
+            const bw = parseFloat(document.getElementById('bw').value);
+
+            let total;
+            const calculateByLift = document.getElementById('calculateByLift').checked;
+            if (calculateByLift && (category === "equippedPowerlifting" || category === "classicPowerlifting")) {
+                const squat = parseFloat(document.getElementById('squat').value);
+                const bench = parseFloat(document.getElementById('bench').value);
+                const deadlift = parseFloat(document.getElementById('deadlift').value);
+
+                if (isNaN(squat) || isNaN(bench) || isNaN(deadlift) || squat <= 0 || bench <= 0 || deadlift <= 0) {
+                    alert('Por favor, introduce valores válidos para los levantamientos.');
+                    return;
+                }
+
+                total = squat + bench + deadlift;
+            } else {
+                total = parseFloat(document.getElementById('total').value);
+
+                if (isNaN(total) || total <= 0) {
+                    alert('Por favor, introduce un valor válido para el total.');
+                    return;
+                }
+            }
+
+            if (isNaN(bw) || bw <= 0) {
+                alert('Por favor, introduce un valor válido para el peso corporal.');
+                return;
+            }
+
+            function calcularCoeficiente(gender, category, bw) {
+                const constants = {
+                    men: {
+                        equippedPowerlifting: { A: 1236.25115, B: 1449.21864, C: 0.01644 },
+                        classicPowerlifting: { A: 1199.72839, B: 1025.18162, C: 0.00921 },
+                        equippedBenchPress: { A: 381.22073, B: 733.79378, C: 0.02398 },
+                        classicBenchPress: { A: 320.98041, B: 281.40258, C: 0.01008 }
+                    },
+                    women: {
+                        equippedPowerlifting: { A: 758.63878, B: 949.31382, C: 0.02435 },
+                        classicPowerlifting: { A: 610.32796, B: 1045.59282, C: 0.03048 },
+                        equippedBenchPress: { A: 221.82209, B: 357.00377, C: 0.02937 },
+                        classicBenchPress: { A: 142.40398, B: 442.52671, C: 0.04724 }
+                    }
+                };
+
+                const { A, B, C } = constants[gender][category];
+                return 100 / (A - B * Math.exp(-C * bw));
+            }
+
+            const coeficiente = calcularCoeficiente(gender, category, bw);
+            const puntosIPF = coeficiente * total;
+
+            document.getElementById('result').textContent = `Puntos IPF: ${puntosIPF.toFixed(2)}`;
+        });
+
+        document.getElementById('category').addEventListener('change', function() {
+            const category = document.getElementById('category').value;
+            const liftingTotals = document.getElementById('lifting-totals');
+            const totalField = document.getElementById('total-field');
+            const calculateByLift = document.getElementById('calculateByLift').checked;
+
+            if (calculateByLift && (category === "equippedPowerlifting" || category === "classicPowerlifting")) {
+                liftingTotals.style.display = "block";
+                totalField.style.display = "none";
+            } else {
+                liftingTotals.style.display = "none";
+                totalField.style.display = "block";
+            }
+        });
+
+        document.getElementById('calculateByLift').addEventListener('change', function() {
+            const category = document.getElementById('category').value;
+            const liftingTotals = document.getElementById('lifting-totals');
+            const totalField = document.getElementById('total-field');
+            const calculateByLift = document.getElementById('calculateByLift').checked;
+
+            if (calculateByLift && (category === "equippedPowerlifting" || category === "classicPowerlifting")) {
+                liftingTotals.style.display = "block";
+                totalField.style.display = "none";
+            } else {
+                liftingTotals.style.display = "none";
+                totalField.style.display = "block";
+            }
+        });
+
+        document.getElementById('category').dispatchEvent(new Event('change'));
+    </script>
+
+</body>
+</html>
