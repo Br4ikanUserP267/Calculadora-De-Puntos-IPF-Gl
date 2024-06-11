@@ -55,7 +55,7 @@
             
             <div class="form-group">
                 <label for="bw">Peso Corporal (kg):</label>
-                <input type="number" id="bw" class="form-control" required>
+                <input type="number" id="bw" class="form-control" step="0.01" required>
             </div>
             
             <div class="form-group">
@@ -68,21 +68,21 @@
             <div id="lifting-totals" style="display: none;">
                 <div class="form-group">
                     <label for="squat">Sentadilla (kg):</label>
-                    <input type="number" id="squat" class="form-control">
+                    <input type="number" id="squat" class="form-control" step="0.01">
                 </div>
                 <div class="form-group">
                     <label for="bench">Press de Banca (kg):</label>
-                    <input type="number" id="bench" class="form-control">
+                    <input type="number" id="bench" class="form-control" step="0.01">
                 </div>
                 <div class="form-group">
                     <label for="deadlift">Peso Muerto (kg):</label>
-                    <input type="number" id="deadlift" class="form-control">
+                    <input type="number" id="deadlift" class="form-control" step="0.01">
                 </div>
             </div>
             
             <div class="form-group" id="total-field">
                 <label for="total">Total (kg):</label>
-                <input type="number" id="total" class="form-control">
+                <input type="number" id="total" class="form-control" step="0.01">
             </div>
             
             <button type="submit" class="btn btn-primary btn-block">Calcular IPF Points</button>
